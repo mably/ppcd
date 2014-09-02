@@ -20,7 +20,7 @@ import (
 	_ "github.com/conformal/btcdb/ldb"
 	_ "github.com/conformal/btcdb/memdb"
 	"github.com/conformal/btcutil"
-	"github.com/conformal/btcwire"
+	"github.com/mably/btcwire"
 	flags "github.com/conformal/go-flags"
 	socks "github.com/conformal/go-socks"
 )

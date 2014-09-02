@@ -15,7 +15,7 @@ import (
 	"github.com/conformal/btcdb"
 	_ "github.com/conformal/btcdb/ldb"
 	"github.com/conformal/btcutil"
-	"github.com/conformal/btcwire"
+	"github.com/mably/btcwire"
 )
 
 var zeroHash = btcwire.ShaHash{}

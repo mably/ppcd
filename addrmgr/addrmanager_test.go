@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/conformal/btcd/addrmgr"
-	"github.com/conformal/btcwire"
+	"github.com/mably/btcwire"
 )
 
 // naTest is used to describe a test to be perfomed against the NetAddressKey

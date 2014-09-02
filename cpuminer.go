@@ -13,7 +13,7 @@ import (
 
 	"github.com/conformal/btcchain"
 	"github.com/conformal/btcutil"
-	"github.com/conformal/btcwire"
+	"github.com/mably/btcwire"
 )
 
 const (

@@ -16,7 +16,7 @@ import (
 	"github.com/conformal/btcdb"
 	"github.com/conformal/btclog"
 	"github.com/conformal/btcscript"
-	"github.com/conformal/btcwire"
+	"github.com/mably/btcwire"
 	"github.com/conformal/seelog"
 )
 

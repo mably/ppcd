@@ -20,7 +20,7 @@ import (
 	"github.com/conformal/btcdb"
 	"github.com/conformal/btcutil"
 	"github.com/conformal/btcutil/bloom"
-	"github.com/conformal/btcwire"
+	"github.com/mably/btcwire"
 	socks "github.com/conformal/go-socks"
 	"github.com/davecgh/go-spew/spew"
 )
