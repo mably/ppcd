@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conformal/btcchain"
-	"github.com/conformal/btcdb"
-	"github.com/conformal/btcscript"
-	"github.com/conformal/btcutil"
+	"github.com/mably/btcchain"
+	"github.com/mably/btcdb"
+	"github.com/mably/btcscript"
+	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
 )
 

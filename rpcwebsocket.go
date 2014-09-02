@@ -18,10 +18,10 @@ import (
 	"time"
 
 	"code.google.com/p/go.crypto/ripemd160"
-	"github.com/conformal/btcdb"
+	"github.com/mably/btcdb"
 	"github.com/conformal/btcjson"
-	"github.com/conformal/btcscript"
-	"github.com/conformal/btcutil"
+	"github.com/mably/btcscript"
+	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
 	"github.com/conformal/btcws"
 	"github.com/conformal/fastsha256"

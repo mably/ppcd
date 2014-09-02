@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/conformal/btcd/addrmgr"
+	"github.com/mably/btcd/addrmgr"
 
-	"github.com/conformal/btcchain"
-	"github.com/conformal/btcdb"
+	"github.com/mably/btcchain"
+	"github.com/mably/btcdb"
 	"github.com/conformal/btclog"
-	"github.com/conformal/btcscript"
+	"github.com/mably/btcscript"
 	"github.com/mably/btcwire"
 	"github.com/conformal/seelog"
 )

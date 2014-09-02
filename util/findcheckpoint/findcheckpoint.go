@@ -9,9 +9,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/conformal/btcchain"
-	"github.com/conformal/btcdb"
-	_ "github.com/conformal/btcdb/ldb"
+	"github.com/mably/btcchain"
+	"github.com/mably/btcdb"
+	_ "github.com/mably/btcdb/ldb"
 	"github.com/mably/btcnet"
 	"github.com/mably/btcwire"
 )

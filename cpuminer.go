@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/conformal/btcchain"
-	"github.com/conformal/btcutil"
+	"github.com/mably/btcchain"
+	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
 )
 

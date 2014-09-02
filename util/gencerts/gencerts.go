@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/conformal/btcutil"
+	"github.com/mably/btcutil"
 	flags "github.com/conformal/go-flags"
 )
 

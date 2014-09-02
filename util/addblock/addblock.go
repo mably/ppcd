@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/conformal/btcchain"
-	"github.com/conformal/btcd/limits"
-	"github.com/conformal/btcdb"
-	_ "github.com/conformal/btcdb/ldb"
+	"github.com/mably/btcchain"
+	"github.com/mably/btcd/limits"
+	"github.com/mably/btcdb"
+	_ "github.com/mably/btcdb/ldb"
 	"github.com/conformal/btclog"
 )
 

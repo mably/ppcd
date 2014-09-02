@@ -5,7 +5,7 @@
 package main
 
 import (
-	"github.com/conformal/btcchain"
+	"github.com/mably/btcchain"
 	"github.com/mably/btcwire"
 )
 
