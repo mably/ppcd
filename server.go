@@ -19,7 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mably/btcd/addrmgr"
+	"github.com/mably/ppcd/addrmgr"
 	"github.com/mably/btcdb"
 	"github.com/conformal/btcjson"
 	"github.com/mably/btcnet"

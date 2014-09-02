@@ -10,7 +10,7 @@ import (
 	"runtime"
 
 	"github.com/mably/btcchain"
-	"github.com/mably/btcd/limits"
+	"github.com/mably/ppcd/limits"
 	"github.com/mably/btcdb"
 	_ "github.com/mably/btcdb/ldb"
 	"github.com/conformal/btclog"

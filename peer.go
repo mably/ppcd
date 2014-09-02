@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/mably/btcchain"
-	"github.com/mably/btcd/addrmgr"
+	"github.com/mably/ppcd/addrmgr"
 	"github.com/mably/btcdb"
 	"github.com/mably/btcutil"
 	"github.com/mably/btcutil/bloom"

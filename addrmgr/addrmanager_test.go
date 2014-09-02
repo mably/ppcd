@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mably/btcd/addrmgr"
+	"github.com/mably/ppcd/addrmgr"
 	"github.com/mably/btcwire"
 )
 

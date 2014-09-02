@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mably/btcd/addrmgr"
+	"github.com/mably/ppcd/addrmgr"
 
 	"github.com/mably/btcchain"
 	"github.com/mably/btcdb"
