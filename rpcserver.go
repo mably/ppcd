@@ -34,7 +34,7 @@ import (
 	"github.com/mably/btcscript"
 	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
-	"github.com/conformal/btcws"
+	"github.com/mably/btcws"
 	"github.com/conformal/fastsha256"
 	"github.com/conformal/websocket"
 )

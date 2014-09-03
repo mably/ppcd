@@ -12,7 +12,7 @@ import (
 
 	"github.com/conformal/btcjson"
 	"github.com/mably/btcutil"
-	"github.com/conformal/btcws"
+	"github.com/mably/btcws"
 	flags "github.com/conformal/go-flags"
 	"github.com/davecgh/go-spew/spew"
 )
