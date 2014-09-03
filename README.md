@@ -1,8 +1,8 @@
-btcd
+ppcd
 ====
 
-[![Build Status](https://travis-ci.org/conformal/btcd.png?branch=master)]
-(https://travis-ci.org/conformal/btcd)
+[![Build Status](https://travis-ci.org/mably/ppcd.png?branch=master)]
+(https://travis-ci.org/mably/ppcd)
 
 btcd is an alternative full node bitcoin implementation written in Go (golang).
 
