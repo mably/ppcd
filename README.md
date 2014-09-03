@@ -6,20 +6,17 @@ ppcd
 
 ppcd is an alternative full node peercoin implementation written in Go (golang).
 
-This project is currently under active development and is in a Beta state.  It
-is extremely stable and has been in production use for over 6 months as of May
-2014, however there are still a couple of major features we want to add before
-we come out of beta.
+This project is currently under active development and not usable in production.
 
 It properly downloads, validates, and serves the block chain using the exact
 rules (including bugs) for block acceptance as Peercoin Core.  We have taken
 great care to avoid ppcd causing a fork to the block chain.
 
-It also relays newly mined blocks, maintains a transaction pool, and relays
-individual transactions that have not yet made it into a block.  It ensures all
-transactions admitted to the pool follow the rules required by the block chain
+It also relays newly mined/minted blocks, maintains a transaction pool, and
+relays individual transactions that have not yet made it into a block.  It ensures
+all transactions admitted to the pool follow the rules required by the block chain
 and also includes the same checks which filter transactions based on
-miner requirements ("standard" transactions) as Bitcoin Core.
+miner/minter requirements ("standard" transactions) as Peercoin Core.
 
 One key difference between ppcd and Peercoin Core is that ppcd does *NOT* include
 wallet functionality and this was a very intentional design decision.  See the
