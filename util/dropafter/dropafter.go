@@ -32,7 +32,7 @@ type config struct {
 }
 
 var (
-	btcdHomeDir     = btcutil.AppDataDir("btcd", false)
+	btcdHomeDir     = btcutil.AppDataDir("ppcd", false)
 	defaultDataDir  = filepath.Join(btcdHomeDir, "data")
 	log             btclog.Logger
 	activeNetParams = &btcnet.MainNetParams

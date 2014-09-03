@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	btcdHomeDir           = btcutil.AppDataDir("btcd", false)
+	btcdHomeDir           = btcutil.AppDataDir("ppcd", false)
 	btcctlHomeDir         = btcutil.AppDataDir("btcctl", false)
 	btcwalletHomeDir      = btcutil.AppDataDir("btcwallet", false)
 	defaultConfigFile     = filepath.Join(btcctlHomeDir, "btcctl.conf")
