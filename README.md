@@ -87,7 +87,7 @@ is used for this project.
 
 The documentation is a work-in-progress.  It uses the [github wiki](https://github.com/mably/ppcd/wiki) facility.
 
-## GPG Verification Key
+<!--## GPG Verification Key
 
 All official release tags are signed by Conformal so users can ensure the code
 has not been tampered with and is coming from Conformal.  To verify the
@@ -106,7 +106,7 @@ signature perform the following:
   ```bash
   git tag -v TAG_NAME
   ```
-
+-->
 ## License
 
 btcd is licensed under the [copyfree](http://copyfree.org) ISC License.
