@@ -33,11 +33,7 @@ active development.
 
 ## Installation
 
-#### Windows - MSI Available
-
-https://github.com/mably/ppcd/releases
-
-#### Linux/BSD/POSIX - Build from Source
+#### Build from Source
 
 - Install Go according to the installation instructions here:
   http://golang.org/doc/install
@@ -52,11 +48,7 @@ https://github.com/mably/ppcd/releases
 
 ## Updating
 
-#### Windows
-
-Install a newer MSI
-
-#### Linux/BSD/POSIX - Build from Source
+#### Build from Source
 
 - Run the following command to update btcd, all dependencies, and install it:
   ```$ go get -u -v github.com/mably/ppcd/...```
@@ -67,9 +59,9 @@ ppcd has several configuration options avilable to tweak how it runs, but all
 of the basic operations described in the intro section work with zero
 configuration.
 
-#### Windows (Installed from MSI)
+#### Windows
 
-Launch ppcd from your Start menu.
+Launch ppcd from your installation folder.
 
 #### Linux/BSD/POSIX/Source
 
