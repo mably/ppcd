@@ -29,7 +29,7 @@ type params struct {
 // to emulate the full reference implementation RPC API.
 var mainNetParams = params{
 	Params:  &btcnet.MainNetParams,
-	rpcPort: "8334",
+	rpcPort: "9902",
 	dnsSeeds: []string{
 		"seed.ppcoin.net",
 		"seedppc.ppcoin.net",

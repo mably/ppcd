@@ -784,18 +784,27 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 			return
 		}
 
+		/*bmgrLog.Infof("block hash %s", blockHash)
+		bmgrLog.Infof("version %d", blockHeader.Version)
+		bmgrLog.Infof("prev hash %s", blockHeader.PrevBlock)
+		bmgrLog.Infof("merkle %s", blockHeader.MerkleRoot)
+		bmgrLog.Infof("time %s", blockHeader.Timestamp)
+		bmgrLog.Infof("bits %d", blockHeader.Bits)
+		bmgrLog.Infof("nonce %d", blockHeader.Nonce)*/
+
 		// Ensure the header properly connects to the previous one and
 		// add it to the list of headers.
 		node := headerNode{sha: &blockHash}
 		prevNode := prevNodeEl.Value.(*headerNode)
 		if prevNode.sha.IsEqual(&blockHeader.PrevBlock) {
 			node.height = prevNode.height + 1
+			bmgrLog.Infof("height %d", node.height)
 			e := b.headerList.PushBack(&node)
 			if b.startHeader == nil {
 				b.startHeader = e
 			}
 		} else {
-			bmgrLog.Warnf("Received block header that does not"+
+			bmgrLog.Warnf("Received block header that does not "+
 				"properly connect to the chain from peer %s "+
 				"-- disconnecting", hmsg.peer.addr)
 			hmsg.peer.Disconnect()
