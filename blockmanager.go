@@ -775,6 +775,8 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 		}
 		finalHash = &blockHash
 
+		bmgrLog.Tracef("Received header %s : %+v", blockHash, blockHeader)
+
 		// Ensure there is a previous header to compare against.
 		prevNodeEl := b.headerList.Back()
 		if prevNodeEl == nil {
@@ -783,14 +785,6 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 			hmsg.peer.Disconnect()
 			return
 		}
-
-		/*bmgrLog.Infof("block hash %s", blockHash)
-		bmgrLog.Infof("version %d", blockHeader.Version)
-		bmgrLog.Infof("prev hash %s", blockHeader.PrevBlock)
-		bmgrLog.Infof("merkle %s", blockHeader.MerkleRoot)
-		bmgrLog.Infof("time %s", blockHeader.Timestamp)
-		bmgrLog.Infof("bits %d", blockHeader.Bits)
-		bmgrLog.Infof("nonce %d", blockHeader.Nonce)*/
 
 		// Ensure the header properly connects to the previous one and
 		// add it to the list of headers.
@@ -1520,7 +1514,8 @@ func loadBlockDB() (btcdb.Db, error) {
 	// Insert the appropriate genesis block for the bitcoin network being
 	// connected to if needed.
 	if height == -1 {
-		genesis := btcutil.NewBlock(activeNetParams.GenesisBlock)
+		genesis := btcutil.NewBlockWithMetas(
+			activeNetParams.GenesisBlock, new(btcutil.Meta))
 		_, err := db.InsertBlock(genesis)
 		if err != nil {
 			db.Close()
