@@ -1515,7 +1515,7 @@ func loadBlockDB() (btcdb.Db, error) {
 	// connected to if needed.
 	if height == -1 {
 		genesis := btcutil.NewBlockWithMetas(
-			activeNetParams.GenesisBlock, new(btcutil.Meta))
+			activeNetParams.GenesisBlock, activeNetParams.GenesisMeta)
 		_, err := db.InsertBlock(genesis)
 		if err != nil {
 			db.Close()
