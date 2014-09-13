@@ -792,7 +792,7 @@ func (b *blockManager) handleHeadersMsg(hmsg *headersMsg) {
 		prevNode := prevNodeEl.Value.(*headerNode)
 		if prevNode.sha.IsEqual(&blockHeader.PrevBlock) {
 			node.height = prevNode.height + 1
-			bmgrLog.Infof("height %d", node.height)
+			//bmgrLog.Tracef("height %d", node.height)
 			e := b.headerList.PushBack(&node)
 			if b.startHeader == nil {
 				b.startHeader = e
