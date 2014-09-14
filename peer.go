@@ -981,7 +981,7 @@ func (p *peer) handleGetHeadersMsg(msg *btcwire.MsgGetHeaders) {
 		}
 
 		// Fetch and send the requested block header.
-		header, err := p.server.db.FetchBlockHeaderBySha(&msg.HashStop)
+		header, _, err := p.server.db.FetchBlockHeaderBySha(&msg.HashStop)
 		if err != nil {
 			peerLog.Warnf("Lookup of known block hash failed: %v",
 				err)
@@ -1037,7 +1037,7 @@ func (p *peer) handleGetHeadersMsg(msg *btcwire.MsgGetHeaders) {
 
 		// Add headers to the message.
 		for _, hash := range hashList {
-			header, err := p.server.db.FetchBlockHeaderBySha(&hash)
+			header, _, err := p.server.db.FetchBlockHeaderBySha(&hash)
 			if err != nil {
 				peerLog.Warnf("Lookup of known block hash "+
 					"failed: %v", err)
