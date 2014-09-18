@@ -54,12 +54,13 @@ var regressionNetParams = params{
 // reference implementation - see the mainNetParams comment for details.
 var testNet3Params = params{
 	Params:  &btcnet.TestNet3Params,
-	rpcPort: "18334",
+	rpcPort: "9904",
 	dnsSeeds: []string{
-		"testnet-seed.alexykot.me",
-		"testnet-seed.bitcoin.schildbach.de",
-		"testnet-seed.bitcoin.petertodd.org",
-		"testnet-seed.bluematt.me",
+		"seed.ppcoin.net",
+		"seedppc.ppcoin.net",
+		"dnsseed.ppc.altcointech.net",
+		"tnseed.ppcoin.net",
+		"tnseedppc.ppcoin.net",
 	},
 }
 
