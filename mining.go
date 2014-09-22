@@ -834,6 +834,12 @@ func UpdateBlockTime(msgBlock *btcwire.MsgBlock, bManager *blockManager) error {
 		return err
 	}
 	msgBlock.Header.Timestamp = newTimestamp
+	// ppc: update coinbase timestamp also.
+	msgBlock.Transactions[0].Time = newTimestamp
+	// ppc: coinbase updated, now MerkleRoot.
+	block := btcutil.NewBlock(msgBlock)
+	merkles := btcchain.BuildMerkleTreeStore(block.Transactions())
+	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]
 
 	// If running on a network that requires recalculating the difficulty,
 	// do so now.
