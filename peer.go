@@ -28,6 +28,10 @@ import (
 const (
 	// maxProtocolVersion is the max protocol version the peer supports.
 	maxProtocolVersion = 60004
+	// TODO(kac-)
+	// ppc: 60003 clients are exhausting ppcd with getblocks calls.
+	// Block them until cause/solution found.
+	minProtocolVersion = 60004
 
 	// outputBufferSize is the number of elements the output channels use.
 	outputBufferSize = 50
@@ -356,12 +360,14 @@ func (p *peer) handleVersionMsg(msg *btcwire.MsgVersion) {
 
 	// Notify and disconnect clients that have a protocol version that is
 	// too old.
-	if msg.ProtocolVersion < int32(btcwire.MultipleAddressVersion) {
+	// TODO(kac-)
+	// ppc: reject 60003 clients causing exhaustion.
+	if msg.ProtocolVersion < int32(minProtocolVersion) {
 		// Send a reject message indicating the protocol version is
 		// obsolete and wait for the message to be sent before
 		// disconnecting.
 		reason := fmt.Sprintf("protocol version must be %d or greater",
-			btcwire.MultipleAddressVersion)
+			minProtocolVersion)
 		p.PushRejectMsg(msg.Command(), btcwire.RejectObsolete, reason,
 			nil, true)
 		p.Disconnect()
