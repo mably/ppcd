@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/conformal/btcec"
-	"github.com/conformal/btcjson"
+	"github.com/mably/btcjson"
 	"github.com/conformal/fastsha256"
 	"github.com/conformal/websocket"
 	"github.com/mably/btcchain"

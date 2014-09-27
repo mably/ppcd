@@ -19,7 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/conformal/btcjson"
+	"github.com/mably/btcjson"
 	"github.com/mably/btcdb"
 	"github.com/mably/btcnet"
 	"github.com/mably/btcwire"
