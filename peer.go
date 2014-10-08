@@ -188,6 +188,9 @@ type peer struct {
 	lastPingNonce      uint64    // Set to nonce if we have a pending ping.
 	lastPingTime       time.Time // Time we sent last ping.
 	lastPingMicros     int64     // Time for last ping to return.
+
+	lastBlockLocator   *btcwire.ShaHash
+	lastBlockLocatorCount int
 }
 
 // String returns the peer's address and directionality as a human-readable
@@ -882,6 +885,28 @@ func (p *peer) handleGetDataMsg(msg *btcwire.MsgGetData) {
 
 // handleGetBlocksMsg is invoked when a peer receives a getblocks bitcoin message.
 func (p *peer) handleGetBlocksMsg(msg *btcwire.MsgGetBlocks) {
+	// TODO(kac-) This part of the code handles looped 'getblocks' requests
+	// from 60003 nodes. It's just a hotfix to allow us work on project further
+	// until more elaborate solution is found.
+	if p.lastBlockLocator == nil {
+		p.lastBlockLocator = msg.BlockLocatorHashes[0]
+	}else{
+		if p.lastBlockLocator.IsEqual(msg.BlockLocatorHashes[0]) {
+			p.lastBlockLocatorCount ++
+			peerLog.Warnf("Repeated block locator(%v): %v", p.lastBlockLocatorCount, p.lastBlockLocator)
+			if p.lastBlockLocatorCount > 3 {
+				peerLog.Errorf("Disconnecting and banning peer for 'getblocks abuse' %s", p);
+				// TODO(kac-) It's disconnected and banned here but
+				// server reconnects to it immediately.
+				p.Disconnect()
+				p.server.BanPeer(p)
+				return
+			}
+		}else {
+			p.lastBlockLocator = msg.BlockLocatorHashes[0]
+			p.lastBlockLocatorCount = 0
+		}
+	}
 	// Return all block hashes to the latest one (up to max per message) if
 	// no stop hash was specified.
 	// Attempt to find the ending index of the stop hash if specified.
