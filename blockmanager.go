@@ -14,10 +14,10 @@ import (
 	"time"
 
 	"github.com/mably/btcchain"
+	"github.com/mably/btcdb"
 	"github.com/mably/btcnet"
 	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
-	"github.com/mably/btcdb"
 )
 
 const (

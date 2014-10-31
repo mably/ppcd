@@ -13,14 +13,14 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/conformal/btclog"
+	flags "github.com/conformal/go-flags"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/mably/btcdb"
 	_ "github.com/mably/btcdb/ldb"
-	"github.com/conformal/btclog"
 	"github.com/mably/btcnet"
 	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
-	flags "github.com/conformal/go-flags"
-	"github.com/davecgh/go-spew/spew"
 )
 
 type ShaHash btcwire.ShaHash

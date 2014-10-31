@@ -9,12 +9,12 @@ import (
 	"os"
 	"path/filepath"
 
+	flags "github.com/conformal/go-flags"
 	"github.com/mably/btcdb"
 	_ "github.com/mably/btcdb/ldb"
 	"github.com/mably/btcnet"
 	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
-	flags "github.com/conformal/go-flags"
 )
 
 const (

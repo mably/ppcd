@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mably/ppcd/addrmgr"
 	"github.com/mably/btcwire"
+	"github.com/mably/ppcd/addrmgr"
 )
 
 // naTest is used to describe a test to be perfomed against the NetAddressKey

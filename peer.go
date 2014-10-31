@@ -7,6 +7,8 @@ package main
 import (
 	"bytes"
 	"container/list"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net"
@@ -15,14 +17,15 @@ import (
 	"sync/atomic"
 	"time"
 
+	socks "github.com/conformal/go-socks"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/mably/btcchain"
-	"github.com/mably/ppcd/addrmgr"
 	"github.com/mably/btcdb"
 	"github.com/mably/btcutil"
 	"github.com/mably/btcutil/bloom"
 	"github.com/mably/btcwire"
-	socks "github.com/conformal/go-socks"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/mably/ppcd/addrmgr"
+	"github.com/mably/ppcutil"
 )
 
 const (
@@ -188,6 +191,8 @@ type peer struct {
 	lastPingNonce      uint64    // Set to nonce if we have a pending ping.
 	lastPingTime       time.Time // Time we sent last ping.
 	lastPingMicros     int64     // Time for last ping to return.
+
+	msgSignatureCache  *ppcutil.Cache
 }
 
 // String returns the peer's address and directionality as a human-readable
@@ -1279,6 +1284,30 @@ func (p *peer) readMessage() (btcwire.Message, []byte, error) {
 	return msg, buf, nil
 }
 
+func (p *peer) CheckMsgSignatureForMisbehaving(msg btcwire.Message, buf []byte) bool {
+	// TODO(mably) This part of the code handles looped requests (ex: getblocks)
+	// from misbehaving nodes. It's just a hotfix to allow us work on project
+	// further until more elaborate solution is found.
+	hasher := md5.New()
+	hasher.Write(buf)
+	msgMd5 := hasher.Sum(nil)
+	msgMd5Str := hex.EncodeToString(msgMd5)
+	peerLog.Debugf("Message %v MD5 = %v", msg.Command(), msgMd5Str)
+	if countValue, ok := p.msgSignatureCache.Get(msgMd5Str); ok {
+		count := countValue.(int)
+		count++
+		peerLog.Warnf("Repeated command %v : %v", msg.Command(), count)
+		if count > 10 {
+			return true
+		} else {
+			p.msgSignatureCache.Add(msgMd5Str, count)
+		}
+	} else {
+		p.msgSignatureCache.Add(msgMd5Str, 0)
+	}
+	return false
+}
+
 // writeMessage sends a bitcoin Message to the peer with logging.
 func (p *peer) writeMessage(msg btcwire.Message) {
 	// Don't do anything if we're disconnecting.
@@ -1434,6 +1463,14 @@ out:
 			// sent before disconnecting.
 			p.PushRejectMsg(vmsg.Command(), btcwire.RejectMalformed,
 				errStr, nil, true)
+			break out
+		}
+
+		if p.CheckMsgSignatureForMisbehaving(rmsg, buf) {
+			// TODO(mably) ban misbehaving peer.
+			errMsg := fmt.Sprintf("Banning misbehaving peer %v", p)
+			p.logError(errMsg)
+			p.server.BanPeer(p)
 			break out
 		}
 
@@ -1894,6 +1931,7 @@ func newPeerBase(s *server, inbound bool) *peer {
 		blockProcessed:  make(chan struct{}, 1),
 		quit:            make(chan struct{}),
 	}
+	p.msgSignatureCache, _ = ppcutil.NewCache(100)
 	return &p
 }
 

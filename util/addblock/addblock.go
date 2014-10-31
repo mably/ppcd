@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/conformal/btclog"
 	"github.com/mably/btcchain"
-	"github.com/mably/ppcd/limits"
 	"github.com/mably/btcdb"
 	_ "github.com/mably/btcdb/ldb"
-	"github.com/conformal/btclog"
+	"github.com/mably/ppcd/limits"
 )
 
 const (

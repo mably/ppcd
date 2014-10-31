@@ -26,17 +26,17 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/conformal/btcec"
+	"github.com/mably/btcjson"
+	"github.com/conformal/fastsha256"
+	"github.com/conformal/websocket"
 	"github.com/mably/btcchain"
 	"github.com/mably/btcdb"
-	"github.com/conformal/btcec"
-	"github.com/conformal/btcjson"
 	"github.com/mably/btcnet"
 	"github.com/mably/btcscript"
 	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
 	"github.com/mably/btcws"
-	"github.com/conformal/fastsha256"
-	"github.com/conformal/websocket"
 )
 
 const (
@@ -135,7 +135,7 @@ var rpcHandlersBeforeInit = map[string]commandHandler{
 	"getchaintips":         handleUnimplemented,
 	"getconnectioncount":   handleGetConnectionCount,
 	"getcurrentnet":        handleGetCurrentNet,
-	"getdifficulty":        handleGetDifficulty,
+	"getdifficulty":        ppcHandleGetDifficulty, // ppc: get both PoS and PoW difficulties
 	"getgenerate":          handleGetGenerate,
 	"gethashespersec":      handleGetHashesPerSec,
 	"getinfo":              handleGetInfo,
@@ -918,6 +918,7 @@ func createTxRawResult(net *btcnet.Params, txSha string, mtx *btcwire.MsgTx,
 		Vin:      vin,
 		Version:  mtx.Version,
 		LockTime: mtx.LockTime,
+		Time:     mtx.Time.Unix(), // ppc:
 	}
 
 	if blk != nil {
@@ -925,7 +926,7 @@ func createTxRawResult(net *btcnet.Params, txSha string, mtx *btcwire.MsgTx,
 		idx := blk.Height()
 
 		// This is not a typo, they are identical in bitcoind as well.
-		txReply.Time = blockHeader.Timestamp.Unix()
+		//txReply.Time = blockHeader.Timestamp.Unix() // ppc:
 		txReply.Blocktime = blockHeader.Timestamp.Unix()
 		txReply.BlockHash = blksha.String()
 		txReply.Confirmations = uint64(1 + maxidx - idx)
@@ -2102,20 +2103,27 @@ func handleGetInfo(s *rpcServer, cmd btcjson.Cmd, closeChan <-chan struct{}) (in
 		rpcsLog.Errorf("Error getting sha: %v", err)
 		return nil, btcjson.ErrBlockCount
 	}
-	blkHeader, _, err := s.server.db.FetchBlockHeaderBySha(sha)
+	_, blkMeta, err := s.server.db.FetchBlockHeaderBySha(sha)
 	if err != nil {
 		rpcsLog.Errorf("Error getting block: %v", err)
+		return nil, btcjson.ErrDifficulty
+	}
+
+	powDifficulty, err := ppcGetDifficultyRatio(s.server.db, sha, false) // ppc: PoW
+	if err != nil {
+		rpcsLog.Errorf("Error getting difficulty: %v", err)
 		return nil, btcjson.ErrDifficulty
 	}
 
 	ret := &btcjson.InfoResult{
 		Version:         int32(1000000*appMajor + 10000*appMinor + 100*appPatch),
 		ProtocolVersion: int32(maxProtocolVersion),
+		MoneySupply:     btcjson.FloatAmount(blkMeta.MoneySupply) / btcutil.SatoshiPerBitcoin,
 		Blocks:          int32(height),
 		TimeOffset:      0,
 		Connections:     s.server.ConnectedCount(),
 		Proxy:           cfg.Proxy,
-		Difficulty:      getDifficultyRatio(blkHeader.Bits),
+		Difficulty:      powDifficulty, // ppc: POW only
 		TestNet:         cfg.TestNet3,
 		RelayFee:        float64(minTxRelayFee) / btcutil.SatoshiPerBitcoin,
 	}
@@ -3104,8 +3112,8 @@ func verifyChain(db btcdb.Db, level, depth int32) error {
 
 		// Level 1 does basic chain sanity checks.
 		if level > 0 {
-			err := btcchain.CheckBlockSanity(block,
-				activeNetParams.PowLimit)
+			err := btcchain.CheckBlockSanity(activeNetParams.Params,
+				block, activeNetParams.PowLimit)
 			if err != nil {
 				rpcsLog.Errorf("Verify is unable to "+
 					"validate block at sha %v height "+

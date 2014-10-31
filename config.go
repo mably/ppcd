@@ -16,13 +16,13 @@ import (
 	"strings"
 	"time"
 
+	flags "github.com/conformal/go-flags"
+	socks "github.com/conformal/go-socks"
 	"github.com/mably/btcdb"
 	_ "github.com/mably/btcdb/ldb"
 	_ "github.com/mably/btcdb/memdb"
 	"github.com/mably/btcutil"
 	"github.com/mably/btcwire"
-	flags "github.com/conformal/go-flags"
-	socks "github.com/conformal/go-socks"
 )
 
 const (

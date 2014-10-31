@@ -12,12 +12,12 @@ import (
 
 	"github.com/mably/ppcd/addrmgr"
 
+	"github.com/conformal/btclog"
+	"github.com/conformal/seelog"
 	"github.com/mably/btcchain"
 	"github.com/mably/btcdb"
-	"github.com/conformal/btclog"
 	"github.com/mably/btcscript"
 	"github.com/mably/btcwire"
-	"github.com/conformal/seelog"
 )
 
 const (
