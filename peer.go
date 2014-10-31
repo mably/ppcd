@@ -1263,14 +1263,6 @@ func (p *peer) readMessage() (btcwire.Message, []byte, error) {
 		return nil, nil, err
 	}
 
-	if ok, _ := p.CheckMsgSignatureForAbuse(msg, buf); !ok {
-		// TODO(mably) It's disconnected and banned here but
-		// server reconnects to it immediately.
-		p.Disconnect()
-		p.server.BanPeer(p)
-		return nil, nil, fmt.Errorf("Disconnecting and banning peer %v for abuse", p)
-	}
-
 	// Use closures to log expensive operations so they are only run when
 	// the logging level requires it.
 	peerLog.Debugf("%v", newLogClosure(func() string {
@@ -1292,7 +1284,7 @@ func (p *peer) readMessage() (btcwire.Message, []byte, error) {
 	return msg, buf, nil
 }
 
-func (p *peer) CheckMsgSignatureForAbuse(msg btcwire.Message, buf []byte) (bool, error) {
+func (p *peer) CheckMsgSignatureForMisbehaving(msg btcwire.Message, buf []byte) bool {
 	// TODO(mably) This part of the code handles looped requests (ex: getblocks)
 	// from misbehaving nodes. It's just a hotfix to allow us work on project
 	// further until more elaborate solution is found.
@@ -1306,14 +1298,14 @@ func (p *peer) CheckMsgSignatureForAbuse(msg btcwire.Message, buf []byte) (bool,
 		count++
 		peerLog.Warnf("Repeated command %v : %v", msg.Command(), count)
 		if count > 10 {
-			return false, nil
+			return true
 		} else {
 			p.msgSignatureCache.Add(msgMd5Str, count)
 		}
 	} else {
 		p.msgSignatureCache.Add(msgMd5Str, 0)
 	}
-	return true, nil
+	return false
 }
 
 // writeMessage sends a bitcoin Message to the peer with logging.
@@ -1471,6 +1463,14 @@ out:
 			// sent before disconnecting.
 			p.PushRejectMsg(vmsg.Command(), btcwire.RejectMalformed,
 				errStr, nil, true)
+			break out
+		}
+
+		if p.CheckMsgSignatureForMisbehaving(rmsg, buf) {
+			// TODO(mably) ban misbehaving peer.
+			errMsg := fmt.Sprintf("Banning misbehaving peer %v", p)
+			p.logError(errMsg)
+			p.server.BanPeer(p)
 			break out
 		}
 
