@@ -1288,22 +1288,27 @@ func (p *peer) CheckMsgSignatureForMisbehaving(msg btcwire.Message, buf []byte) 
 	// TODO(mably) This part of the code handles looped requests (ex: getblocks)
 	// from misbehaving nodes. It's just a hotfix to allow us work on project
 	// further until more elaborate solution is found.
-	hasher := md5.New()
-	hasher.Write(buf)
-	msgMd5 := hasher.Sum(nil)
-	msgMd5Str := hex.EncodeToString(msgMd5)
-	peerLog.Tracef("Message %v MD5 = %v", msg.Command(), msgMd5Str)
-	if countValue, ok := p.msgSignatureCache.Get(msgMd5Str); ok {
-		count := countValue.(int)
-		count++
-		peerLog.Warnf("Repeated command %v : %v", msg.Command(), count)
-		if count > 5 {
-			return true
-		} else {
-			p.msgSignatureCache.Add(msgMd5Str, count)
-		}
-	} else {
-		p.msgSignatureCache.Add(msgMd5Str, 0)
+	switch msg.(type) {
+		case *btcwire.MsgGetAddr:
+			// Dont count getaddr msg signature
+		default:
+			hasher := md5.New()
+			hasher.Write(buf)
+			msgMd5 := hasher.Sum(nil)
+			msgMd5Str := hex.EncodeToString(msgMd5)
+			peerLog.Tracef("Message %v MD5 = %v", msg.Command(), msgMd5Str)
+			if countValue, ok := p.msgSignatureCache.Get(msgMd5Str); ok {
+				count := countValue.(int)
+				count++
+				peerLog.Warnf("Repeated command %v : %v", msg.Command(), count)
+				if count > 5 {
+					return true
+				} else {
+					p.msgSignatureCache.Add(msgMd5Str, count)
+				}
+			} else {
+				p.msgSignatureCache.Add(msgMd5Str, 0)
+			}
 	}
 	return false
 }
