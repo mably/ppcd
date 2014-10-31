@@ -1292,12 +1292,12 @@ func (p *peer) CheckMsgSignatureForMisbehaving(msg btcwire.Message, buf []byte) 
 	hasher.Write(buf)
 	msgMd5 := hasher.Sum(nil)
 	msgMd5Str := hex.EncodeToString(msgMd5)
-	peerLog.Debugf("Message %v MD5 = %v", msg.Command(), msgMd5Str)
+	peerLog.Tracef("Message %v MD5 = %v", msg.Command(), msgMd5Str)
 	if countValue, ok := p.msgSignatureCache.Get(msgMd5Str); ok {
 		count := countValue.(int)
 		count++
 		peerLog.Warnf("Repeated command %v : %v", msg.Command(), count)
-		if count > 10 {
+		if count > 5 {
 			return true
 		} else {
 			p.msgSignatureCache.Add(msgMd5Str, count)
