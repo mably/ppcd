@@ -1477,7 +1477,8 @@ out:
 
 		if p.checkMisbehaving(rmsg, buf) {
 			// TODO(mably) ban misbehaving peer.
-			errMsg := fmt.Sprintf("Banning misbehaving peer %v", p)
+			errMsg := fmt.Sprintf("Banning misbehaving peer %v, %v, %v",
+				p, p.protocolVersion, p.userAgent)
 			p.logError(errMsg)
 			p.server.BanPeer(p)
 			break out
