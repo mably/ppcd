@@ -1284,31 +1284,35 @@ func (p *peer) readMessage() (btcwire.Message, []byte, error) {
 	return msg, buf, nil
 }
 
-func (p *peer) CheckMsgSignatureForMisbehaving(msg btcwire.Message, buf []byte) bool {
+func (p *peer) checkMisbehaving(msg btcwire.Message, buf []byte) bool {
+	switch msg.(type) {
+		case *btcwire.MsgGetBlocks:
+			return p.checkMsgSignatureDuplicates(msg, buf, 5)
+	}
+	return false
+}
+
+func (p *peer) checkMsgSignatureDuplicates(
+	msg btcwire.Message, buf []byte, maxDuplicates uint32) bool {
 	// TODO(mably) This part of the code handles looped requests (ex: getblocks)
 	// from misbehaving nodes. It's just a hotfix to allow us work on project
 	// further until more elaborate solution is found.
-	switch msg.(type) {
-		case *btcwire.MsgGetAddr:
-			// Dont count getaddr msg signature
-		default:
-			hasher := md5.New()
-			hasher.Write(buf)
-			msgMd5 := hasher.Sum(nil)
-			msgMd5Str := hex.EncodeToString(msgMd5)
-			peerLog.Tracef("Message %v MD5 = %v", msg.Command(), msgMd5Str)
-			if countValue, ok := p.msgSignatureCache.Get(msgMd5Str); ok {
-				count := countValue.(int)
-				count++
-				peerLog.Warnf("Repeated command %v : %v", msg.Command(), count)
-				if count > 5 {
-					return true
-				} else {
-					p.msgSignatureCache.Add(msgMd5Str, count)
-				}
-			} else {
-				p.msgSignatureCache.Add(msgMd5Str, 0)
-			}
+	hasher := md5.New()
+	hasher.Write(buf)
+	msgMd5 := hasher.Sum(nil)
+	msgMd5Str := hex.EncodeToString(msgMd5)
+	peerLog.Tracef("Message %v MD5 = %v", msg.Command(), msgMd5Str)
+	if countValue, ok := p.msgSignatureCache.Get(msgMd5Str); ok {
+		count := countValue.(uint32)
+		count++
+		peerLog.Warnf("Repeated command %v : %v", msg.Command(), count)
+		if count > maxDuplicates {
+			return true
+		} else {
+			p.msgSignatureCache.Add(msgMd5Str, count)
+		}
+	} else {
+		p.msgSignatureCache.Add(msgMd5Str, uint32(0))
 	}
 	return false
 }
@@ -1471,7 +1475,7 @@ out:
 			break out
 		}
 
-		if p.CheckMsgSignatureForMisbehaving(rmsg, buf) {
+		if p.checkMisbehaving(rmsg, buf) {
 			// TODO(mably) ban misbehaving peer.
 			errMsg := fmt.Sprintf("Banning misbehaving peer %v", p)
 			p.logError(errMsg)
