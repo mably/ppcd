@@ -1,8 +1,8 @@
 ppcd
 ====
 
-[![Build Status](https://travis-ci.org/mably/ppcd.png?branch=master)]
-(https://travis-ci.org/mably/ppcd) [![tip for next commit](http://peer4commit.com/projects/130.svg)](http://peer4commit.com/projects/130)
+[![Build Status](https://travis-ci.org/mably/ppcd.png?branch=mably)](https://travis-ci.org/mably/ppcd)
+[![tip for next commit](http://peer4commit.com/projects/130.svg)](http://peer4commit.com/projects/130)
 
 ppcd is an alternative full node peercoin implementation written in Go (golang) based on Conformal btcd code.
 
