@@ -1,0 +1,12 @@
+author: "ppcd developers"
+description: "An alternative full node peercoin implementation written in Go (golang)"
+filesets:
+  includes:
+  - README.md
+  - LICENSE
+  excludes:
+  - \.git
+  depth:
+settings:
+  build:
+  - go install -v -u
