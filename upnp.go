@@ -301,27 +301,6 @@ func findFirstIPv4NoLoopback(ips []net.IP) (validIp net.IP, err error) {
 	return
 }
 
-func verifyIPv4Addr(addr string) (ipStr string, err error) {
-	if addr > "" {
-		ip := net.ParseIP(addr)
-		if ip == nil {
-			err = errors.New("Invalid IP address")
-			return
-		}
-		if ip.To4() == nil {
-			err = errors.New("Not IPv4 address")
-			return
-		}
-		if ip.IsLoopback() {
-			err = errors.New("Loopback address")
-			return
-		}
-		discLog.Tracef("Valid IPv4 address = %v", ip)
-		ipStr = ip.String()
-	}
-	return
-}
-
 // getServiceURL parses the xml description at the given root url to find the
 // url for the WANIPConnection service to be used for port forwarding.
 func getServiceURL(rootURL string) (url string, err error) {
