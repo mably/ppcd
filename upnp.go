@@ -65,7 +65,7 @@ type upnpNAT struct {
 
 // Discover searches the local network for a UPnP router returning a NAT
 // for the network if so, nil if not.
-func Discover() (nat NAT, err error) {
+func Discover(listeners []string) (nat NAT, err error) {
 	ssdp, err := net.ResolveUDPAddr("udp4", "239.255.255.250:1900")
 	if err != nil {
 		return
@@ -127,7 +127,7 @@ func Discover() (nat NAT, err error) {
 			return
 		}
 		var ourIP string
-		ourIP, err = getOurIP()
+		ourIP, err = getOurIP(listeners)
 		if err != nil {
 			return
 		}
@@ -214,37 +214,72 @@ func getChildService(d *device, serviceType string) *service {
 }
 
 // getOurIP returns a best guess at what the local IP is.
-func getOurIP() (ip string, err error) {
+func getOurIP(listeners []string) (ourIP string, err error) {
+	ips, err := getInterfacesAddresses()
+	if err != nil {
+		return
+	}
+	if len(ips) == 0 {
+		err = errors.New("No available interface address")
+		return
+	}
+	ourIP, err = findFirstMatchingAddress(ips, listeners, true)
+	if err != nil || ourIP > "" {
+		return
+	}
 	hostname, err := os.Hostname()
 	discLog.Tracef("hostname = %v", hostname)
 	if err != nil {
 		return
 	}
 	addrs, err := net.LookupHost(hostname)
+	if err != nil {
+		return
+	}
+	ourIP, err = findFirstMatchingAddress(ips, addrs, false)
+	if err != nil || ourIP > "" {
+		return
+	}
+	ourIP = ips[0].String()
+	discLog.Tracef("default address = %v", ourIP)
+	return
+}
+
+func findFirstMatchingAddress(ips []net.IP, addrs []string, splitHostPort bool) (matchingAddr string, err error) {
 	for _, addr := range addrs {
-		ip, err = verifyIPv4Addr(addr)
-		if err != nil || ip > "" {
-			return
+		discLog.Tracef("addr = %v", addr)
+		if splitHostPort {
+			addr, _, err = net.SplitHostPort(addr)
+			if err != nil {
+				continue
+			}
+		}
+		addrIP := net.ParseIP(addr)
+		if addrIP == nil {
+			continue
+		}
+		for _, ip := range ips {
+			if addrIP.Equal(ip) {
+				matchingAddr = ip.String()
+				return
+			}
 		}
 	}
-	if ip == "" {
-		interfaces, _ := net.Interfaces()
-		for _, inter := range interfaces {
-			discLog.Tracef("name = %v, addr = %v", inter.Name, inter.HardwareAddr)
-			if addrs, errAddrs := inter.Addrs(); errAddrs == nil {
-				for _, addr := range addrs {
-					discLog.Trace(inter.Name, "->", addr)
-					var addrIP string
-					switch addr.(type) {
-					case *net.IPNet:
-						addrIP = addr.(*net.IPNet).IP.String()
-					case *net.IPAddr:
-						addrIP = addr.(*net.IPAddr).IP.String()
-					}
-					ip, err = verifyIPv4Addr(addrIP)
-					if err != nil || ip > "" {
-						return
-					}
+	return
+}
+
+func getInterfacesAddresses() (ips []net.IP, err error) {
+	ips = make([]net.IP, 0, 20)
+	interfaces, _ := net.Interfaces()
+	for _, inter := range interfaces {
+		if addrs, errAddrs := inter.Addrs(); errAddrs == nil {
+			for _, addr := range addrs {
+				discLog.Trace(inter.Name, "->", addr)
+				switch addr.(type) {
+				case *net.IPNet:
+					ips = append(ips, addr.(*net.IPNet).IP)
+				case *net.IPAddr:
+					ips = append(ips, addr.(*net.IPAddr).IP)
 				}
 			}
 		}
@@ -252,26 +287,37 @@ func getOurIP() (ip string, err error) {
 	return
 }
 
-func verifyIPv4Addr(addr string) (ip string, err error) {
+func findFirstIPv4NoLoopback(ips []net.IP) (validIp net.IP, err error) {
+	for _, ip := range ips {
+		if ip.To4() == nil {
+			continue
+		}
+		if ip.IsLoopback() {
+			continue
+		}
+		validIp = ip
+		break
+	}
+	return
+}
+
+func verifyIPv4Addr(addr string) (ipStr string, err error) {
 	if addr > "" {
-		isIPv4, errIP := isIPv4(addr)
-		discLog.Tracef("addr = %v, ipv4 = %v", addr, isIPv4)
-		if errIP != nil {
-			err = errIP
+		ip := net.ParseIP(addr)
+		if ip == nil {
+			err = errors.New("Invalid IP address")
 			return
 		}
-		if isIPv4 {
-			discLog.Tracef("IPv4 address found = %v", addr)
-			isLoopBack, errLP := isLoopBackIPv4(addr)
-			if errLP != nil {
-				err = errLP
-				return
-			}
-			if isLoopBack {
-				return
-			}
-			ip = addr
+		if ip.To4() == nil {
+			err = errors.New("Not IPv4 address")
+			return
 		}
+		if ip.IsLoopback() {
+			err = errors.New("Loopback address")
+			return
+		}
+		discLog.Tracef("Valid IPv4 address = %v", ip)
+		ipStr = ip.String()
 	}
 	return
 }
