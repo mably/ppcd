@@ -1041,7 +1041,7 @@ out:
 			// TODO(oga) if specific listen port doesn't work then ask for wildcard
 			// listen port?
 			// XXX this assumes timeout is in seconds.
-			listenPort, err := s.nat.AddPortMapping("tcp", int(lport), int(lport),
+			listenPort, err := s.nat.AddPortMapping("tcp", int(lport),
 				"ppcd listen port", 0) // ppc: 20*60 incompatibility with some routers
 			if err != nil {
 				srvrLog.Warnf("can't add UPnP port mapping: %v", err)

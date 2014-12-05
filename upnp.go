@@ -52,7 +52,7 @@ type NAT interface {
 	GetExternalAddress() (addr net.IP, err error)
 	// Add a port mapping for protocol ("udp" or "tcp") from externalport to
 	// internal port with description lasting for timeout.
-	AddPortMapping(protocol string, externalPort, internalPort int, description string, timeout int) (mappedExternalPort int, err error)
+	AddPortMapping(protocol string, externalPort int, description string, timeout int) (mappedExternalPort int, err error)
 	// Remove a previously added port mapping from externalport to
 	// internal port.
 	DeletePortMapping(protocol string, externalPort, internalPort int) (err error)
@@ -61,6 +61,7 @@ type NAT interface {
 type upnpNAT struct {
 	serviceURL string
 	ourIP      string
+	ourPort    string
 }
 
 // Discover searches the local network for a UPnP router returning a NAT
@@ -127,12 +128,14 @@ func Discover(listeners []string) (nat NAT, err error) {
 			return
 		}
 		var ourIP string
-		ourIP, err = getOurIP(listeners)
+		var ourPort string
+		ourIP, ourPort, err = getOurIP(listeners)
 		if err != nil {
 			return
 		}
-		nat = &upnpNAT{serviceURL: serviceURL, ourIP: ourIP}
-		discLog.Debugf("UPNP serviceURL = %v, ourIP = %v", serviceURL, ourIP)
+		nat = &upnpNAT{serviceURL: serviceURL, ourIP: ourIP, ourPort: ourPort}
+		discLog.Debugf("UPNP serviceURL = %v, ourIP = %v, ourPort = %v",
+			serviceURL, ourIP, ourPort)
 		return
 	}
 	err = errors.New("UPnP port discovery failed")
@@ -214,7 +217,7 @@ func getChildService(d *device, serviceType string) *service {
 }
 
 // getOurIP returns a best guess at what the local IP is.
-func getOurIP(listeners []string) (ourIP string, err error) {
+func getOurIP(listeners []string) (ourIP string, ourPort string, err error) {
 	ips, err := getInterfacesAddresses()
 	if err != nil {
 		return
@@ -223,7 +226,10 @@ func getOurIP(listeners []string) (ourIP string, err error) {
 		err = errors.New("No available interface address")
 		return
 	}
-	ourIP, err = findFirstMatchingAddress(ips, listeners, true)
+	defer func() {
+		discLog.Tracef("OurIP = %v, OurPort = %v", ourIP, ourPort)
+	}()
+	ourIP, ourPort, err = findFirstMatchingAddress(ips, listeners, true)
 	if err != nil || ourIP > "" {
 		return
 	}
@@ -236,20 +242,25 @@ func getOurIP(listeners []string) (ourIP string, err error) {
 	if err != nil {
 		return
 	}
-	ourIP, err = findFirstMatchingAddress(ips, addrs, false)
-	if err != nil || ourIP > "" {
+	ourIP, _, err = findFirstMatchingAddress(ips, addrs, false)
+	if err != nil {
 		return
 	}
-	ourIP = ips[0].String()
-	discLog.Tracef("default address = %v", ourIP)
+	if ourIP == "" {
+		ourIP = ips[0].String()
+	}
+	if len(listeners) > 0 {
+		_, ourPort, _ = net.SplitHostPort(listeners[0])
+	}
 	return
 }
 
-func findFirstMatchingAddress(ips []net.IP, addrs []string, splitHostPort bool) (matchingAddr string, err error) {
+func findFirstMatchingAddress(ips []net.IP, addrs []string, splitHostPort bool) (matchingAddr string, matchingPort string, err error) {
+	var port string
 	for _, addr := range addrs {
 		discLog.Tracef("addr = %v", addr)
 		if splitHostPort {
-			addr, _, err = net.SplitHostPort(addr)
+			addr, port, err = net.SplitHostPort(addr)
 			if err != nil {
 				continue
 			}
@@ -261,6 +272,7 @@ func findFirstMatchingAddress(ips []net.IP, addrs []string, splitHostPort bool) 
 		for _, ip := range ips {
 			if addrIP.Equal(ip) {
 				matchingAddr = ip.String()
+				matchingPort = port
 				return
 			}
 		}
@@ -440,12 +452,12 @@ func (n *upnpNAT) GetExternalAddress() (addr net.IP, err error) {
 
 // AddPortMapping implements the NAT interface by setting up a port forwarding
 // from the UPnP router to the local machine with the given ports and protocol.
-func (n *upnpNAT) AddPortMapping(protocol string, externalPort, internalPort int, description string, timeout int) (mappedExternalPort int, err error) {
+func (n *upnpNAT) AddPortMapping(protocol string, externalPort int, description string, timeout int) (mappedExternalPort int, err error) {
 	// A single concatenation would break ARM compilation.
 	message := "<u:AddPortMapping xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\">\r\n" +
 		"<NewRemoteHost></NewRemoteHost><NewExternalPort>" + strconv.Itoa(externalPort)
 	message += "</NewExternalPort><NewProtocol>" + strings.ToUpper(protocol) + "</NewProtocol>"
-	message += "<NewInternalPort>" + strconv.Itoa(internalPort) + "</NewInternalPort>" +
+	message += "<NewInternalPort>" + n.ourPort + "</NewInternalPort>" +
 		"<NewInternalClient>" + n.ourIP + "</NewInternalClient>" +
 		"<NewEnabled>1</NewEnabled><NewPortMappingDescription>"
 	message += description +
@@ -466,7 +478,7 @@ func (n *upnpNAT) AddPortMapping(protocol string, externalPort, internalPort int
 	return
 }
 
-// AddPortMapping implements the NAT interface by removing up a port forwarding
+// DeletePortMapping implements the NAT interface by removing up a port forwarding
 // from the UPnP router to the local machine with the given ports and.
 func (n *upnpNAT) DeletePortMapping(protocol string, externalPort, internalPort int) (err error) {
 
