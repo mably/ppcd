@@ -623,6 +623,16 @@ func (b *blockManager) handleBlockMsg(bmsg *blockMsg) {
 				"latest block: %v", err)
 		} else {
 			bmsg.peer.PushGetBlocksMsg(locator, orphanRoot)
+			// ppc: getblocks may not obtain the ancestor block rejected
+			// processBlock by duplicate-stake check so we ask for it again directly
+			// https://github.com/ppcoin/ppcoin/blob/v0.4.0ppc/src/main.cpp#L2054
+			if bmsg.block.IsProofOfStake() && b.IsCurrent() {
+				wanted := b.blockChain.PPCWantedByOrphan(bmsg.block)
+				gdmsg := btcwire.NewMsgGetData()
+				iv := btcwire.NewInvVect(btcwire.InvTypeBlock, wanted)
+				gdmsg.AddInvVect(iv)
+				b.syncPeer.QueueMessage(gdmsg, nil)
+			}
 		}
 	} else {
 		// When the block is not an orphan, log information about it and
